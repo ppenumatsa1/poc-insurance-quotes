@@ -39,12 +39,12 @@ jobs:
 
       - name: Install dependencies
         run: |
-          npm install --legacy-peer-deps --no-audit
-          npm set-script prepare ""
+          npm config set fund false
+          npm install --legacy-peer-deps --no-audit --no-fund
         working-directory: ${{ env.APP_LOCATION }}
 
       - name: Build
-        run: npm run build --no-audit
+        run: npm run build --no-audit --no-fund
         working-directory: ${{ env.APP_LOCATION }}
 
       - name: Deploy to Azure Static Web Apps

@@ -12,7 +12,7 @@ on:
       - 'backend/**'
 
 env:
-  AZURE_WEBAPP_NAME: insurance-quotes-api    # set this to your application's name
+  AZURE_WEBAPP_NAME: poc-dotnetbe-0429   # set this to your application's name
   AZURE_WEBAPP_PACKAGE_PATH: 'backend/InsuranceQuotes.Api/publish'      # set this to the path to your web app project
   DOTNET_VERSION: '8.0.x'                    # set this to the .NET version to use
 
