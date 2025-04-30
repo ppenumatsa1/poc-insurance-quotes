@@ -33,8 +33,14 @@ jobs:
           cache: 'npm'
           cache-dependency-path: ${{ env.APP_LOCATION }}/package-lock.json
 
+      - name: Clean npm cache
+        run: npm cache clean --force
+        working-directory: ${{ env.APP_LOCATION }}
+
       - name: Install dependencies
-        run: npm ci
+        run: |
+          npm install
+          npm audit fix
         working-directory: ${{ env.APP_LOCATION }}
 
       - name: Build
