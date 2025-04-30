@@ -1,0 +1,7 @@
+name: insurance-quotes
+services:
+  api:
+    project: backend/InsuranceQuotes.Api
+    language: dotnet
+    host: appservice
+    module: api

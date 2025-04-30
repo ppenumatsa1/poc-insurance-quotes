@@ -1,0 +1,77 @@
+name: Backend CI/CD
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-ci.yml'
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - 'backend/**'
+
+env:
+  AZURE_WEBAPP_NAME: insurance-quotes-api    # set this to your application's name
+  AZURE_WEBAPP_PACKAGE_PATH: 'backend/InsuranceQuotes.Api/publish'      # set this to the path to your web app project
+  DOTNET_VERSION: '8.0.x'                    # set this to the .NET version to use
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+    
+    - name: Restore dependencies
+      run: dotnet restore
+      working-directory: backend/InsuranceQuotes.Api
+    
+    - name: Build
+      run: dotnet build --no-restore --configuration Release
+      working-directory: backend/InsuranceQuotes.Api
+    
+    - name: Test
+      run: dotnet test --no-build --verbosity normal --configuration Release
+      working-directory: backend/InsuranceQuotes.Api
+    
+    - name: Publish
+      run: dotnet publish --no-build --configuration Release --output ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+      working-directory: backend/InsuranceQuotes.Api
+    
+    - name: Upload artifact for deployment job
+      uses: actions/upload-artifact@v3
+      with:
+        name: insurance-quotes-api
+        path: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    environment:
+      name: 'Production'
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+
+    steps:
+    - name: Download artifact from build job
+      uses: actions/download-artifact@v3
+      with:
+        name: insurance-quotes-api
+    
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+    
+    - name: Deploy to Azure Web App
+      id: deploy-to-webapp
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: ${{ env.AZURE_WEBAPP_NAME }}
+        package: .
