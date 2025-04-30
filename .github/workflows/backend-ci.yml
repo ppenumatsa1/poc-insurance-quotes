@@ -14,7 +14,7 @@ on:
 env:
   AZURE_WEBAPP_NAME: insurance-quotes-api    # set this to your application's name
   AZURE_WEBAPP_PACKAGE_PATH: 'backend/InsuranceQuotes.Api/publish'      # set this to the path to your web app project
-  DOTNET_VERSION: '8.0'                    # set this to the .NET version to use
+  DOTNET_VERSION: '8.0.x'                    # set this to the .NET version to use
 
 jobs:
   build:
@@ -41,14 +41,15 @@ jobs:
       working-directory: backend/InsuranceQuotes.Api
     
     - name: Publish
-      run: dotnet publish --no-build --configuration Release --output ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+      run: dotnet publish --no-build --configuration Release --output ./publish
       working-directory: backend/InsuranceQuotes.Api
     
-    - name: Upload artifact for deployment job
-      uses: actions/upload-artifact@v3
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
       with:
         name: insurance-quotes-api
-        path: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+        path: backend/InsuranceQuotes.Api/publish/**
+        if-no-files-found: error
 
   deploy:
     runs-on: ubuntu-latest
@@ -59,10 +60,11 @@ jobs:
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
 
     steps:
-    - name: Download artifact from build job
-      uses: actions/download-artifact@v3
+    - name: Download artifact
+      uses: actions/download-artifact@v4
       with:
         name: insurance-quotes-api
+        path: ./publish
     
     - name: Azure Login
       uses: azure/login@v1
@@ -74,4 +76,4 @@ jobs:
       uses: azure/webapps-deploy@v2
       with:
         app-name: ${{ env.AZURE_WEBAPP_NAME }}
-        package: .
+        package: ./publish
