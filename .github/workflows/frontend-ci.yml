@@ -2,12 +2,12 @@ name: Frontend CI/CD
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "dev", "feature/*" ]
     paths:
       - 'frontend/**'
       - '.github/workflows/frontend-ci.yml'
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main", "dev", "feature/*" ]
     paths:
       - 'frontend/**'
 
@@ -18,7 +18,10 @@ env:
 jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
+    if: github.event_name == 'push'
+    environment:
+      name: 'Production'
+      url: ${{ steps.deploy-static-web-app.outputs.static_web_app_url }}
     
     steps:
       - uses: actions/checkout@v4
@@ -39,6 +42,7 @@ jobs:
         working-directory: ${{ env.APP_LOCATION }}
 
       - name: Deploy to Azure Static Web Apps
+        id: deploy-static-web-app
         uses: Azure/static-web-apps-deploy@v1
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
