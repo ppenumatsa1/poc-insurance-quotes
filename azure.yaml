@@ -5,3 +5,13 @@ services:
     language: dotnet
     host: appservice
     module: api
+  web:
+    project: frontend/InsuranceQuotes.UI
+    language: js
+    host: staticwebapp
+    module: web
+    dist: build # Specify the build output directory
+    config:
+      output_location: build # Match the output location with your build directory
+      app_location: "/" # Root of your app
+      api_location: "" # No API location as it's deployed separately

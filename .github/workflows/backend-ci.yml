@@ -1,15 +1,7 @@
 name: Backend CI/CD
 
 on:
-  push:
-    branches: [ "main", "dev", "feature/*" ]
-    paths:
-      - 'backend/**'
-      - '.github/workflows/backend-ci.yml'
-  pull_request:
-    branches: [ "main", "dev", "feature/*" ]
-    paths:
-      - 'backend/**'
+  workflow_dispatch:  # Manual trigger only
 
 env:
   AZURE_WEBAPP_NAME: poc-dotnetbe-0429   # set this to your application's name
@@ -56,7 +48,6 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     needs: build
-    if: github.event_name == 'push'
     environment:
       name: 'Production'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
